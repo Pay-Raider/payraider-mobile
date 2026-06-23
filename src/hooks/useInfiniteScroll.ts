@@ -10,7 +10,8 @@ export interface InfiniteScrollItem {
 
 export interface InfiniteScrollState {
   items: InfiniteScrollItem[];
-  page: number;
+  /** Opaque cursor returned by the last page; null means no more pages. */
+  cursor: string | null;
   hasMore: boolean;
   isLoading: boolean;
   error?: string;
@@ -19,7 +20,6 @@ export interface InfiniteScrollState {
 
 export interface UseInfiniteScrollOptions {
   pageSize?: number;
-  initialPage?: number;
 }
 
 export interface UseInfiniteScrollResult extends InfiniteScrollState {
@@ -27,27 +27,58 @@ export interface UseInfiniteScrollResult extends InfiniteScrollState {
   refresh: () => Promise<void>;
 }
 
-function createItems(page: number, pageSize: number): InfiniteScrollItem[] {
-  return Array.from({ length: pageSize }, (_, index) => {
-    const itemNumber = (page - 1) * pageSize + index + 1;
+// ---------------------------------------------------------------------------
+// Internal helpers — simulate cursor-based backend responses.
+// In production these are replaced by real API calls that return
+// { items, nextCursor } where nextCursor is null on the last page.
+// ---------------------------------------------------------------------------
 
-    return {
-      id: `insight-${itemNumber}`,
-      title: `Insight ${itemNumber}`,
-      description: `Loaded from page ${page}`,
-    };
-  });
+interface CursorPage {
+  items: InfiniteScrollItem[];
+  nextCursor: string | null;
 }
 
-export function useInfiniteScroll(options: UseInfiniteScrollOptions = {}): UseInfiniteScrollResult {
+function fetchPage(cursor: string | null, pageSize: number): CursorPage {
+  // Decode the offset encoded in the cursor ("cursor:<offset>") or start at 0.
+  const offset = cursor ? parseInt(cursor.replace('cursor:', ''), 10) : 0;
+  const maxItems = pageSize * 4; // 4 pages of data in the mock
+
+  const items: InfiniteScrollItem[] = Array.from(
+    { length: Math.min(pageSize, Math.max(0, maxItems - offset)) },
+    (_, i) => {
+      const n = offset + i + 1;
+      return {
+        id: `insight-${n}`,
+        title: `Insight ${n}`,
+        description: `Fetched with cursor offset ${offset}`,
+      };
+    },
+  );
+
+  const nextOffset = offset + items.length;
+  const nextCursor = nextOffset < maxItems ? `cursor:${nextOffset}` : null;
+
+  return { items, nextCursor };
+}
+
+// ---------------------------------------------------------------------------
+
+export function useInfiniteScroll(
+  options: UseInfiniteScrollOptions = {},
+): UseInfiniteScrollResult {
   const isOnline = useAppStore(state => state.isOnline);
-  const pageSize = options.pageSize ?? Platform.select({ ios: 12, android: 10, default: 10 }) ?? 10;
-  const initialPage = options.initialPage ?? 1;
-  const platformThreshold = Platform.select({ ios: 0.35, android: 0.45, default: 0.4 }) ?? 0.4;
+  const pageSize =
+    options.pageSize ??
+    (Platform.select({ ios: 12, android: 10, default: 10 }) ?? 10);
+  const platformThreshold =
+    Platform.select({ ios: 0.35, android: 0.45, default: 0.4 }) ?? 0.4;
+
+  const initialPage = React.useMemo(() => fetchPage(null, pageSize), [pageSize]);
+
   const [state, setState] = React.useState<InfiniteScrollState>({
-    items: createItems(initialPage, pageSize),
-    page: initialPage,
-    hasMore: true,
+    items: initialPage.items,
+    cursor: initialPage.nextCursor,
+    hasMore: initialPage.nextCursor !== null,
     isLoading: false,
     platformThreshold,
   });
@@ -58,43 +89,54 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions = {}): UseIn
     }
 
     if (!isOnline) {
-      setState(current => ({ ...current, error: 'Connect to the internet to load more results' }));
+      setState(s => ({
+        ...s,
+        error: 'Connect to the internet to load more results',
+      }));
       return;
     }
 
-    setState(current => ({ ...current, isLoading: true, error: undefined }));
+    setState(s => ({ ...s, isLoading: true, error: undefined }));
 
     try {
-      const nextPage = state.page + 1;
-      const nextItems = createItems(nextPage, pageSize);
+      const { items: nextItems, nextCursor } = fetchPage(state.cursor, pageSize);
 
-      setState(current => ({
-        ...current,
-        items: [...current.items, ...nextItems],
-        page: nextPage,
-        hasMore: nextPage < 5,
+      setState(s => ({
+        ...s,
+        items: [...s.items, ...nextItems],
+        cursor: nextCursor,
+        hasMore: nextCursor !== null,
         isLoading: false,
       }));
     } catch {
-      setState(current => ({ ...current, isLoading: false, error: 'Unable to load more results' }));
+      setState(s => ({
+        ...s,
+        isLoading: false,
+        error: 'Unable to load more results',
+      }));
     }
-  }, [isOnline, pageSize, state.hasMore, state.isLoading, state.page]);
+  }, [isOnline, pageSize, state.hasMore, state.isLoading, state.cursor]);
 
   const refresh = React.useCallback(async () => {
-    setState(current => ({ ...current, isLoading: true, error: undefined }));
+    setState(s => ({ ...s, isLoading: true, error: undefined }));
 
     try {
+      const { items, nextCursor } = fetchPage(null, pageSize);
       setState({
-        items: createItems(initialPage, pageSize),
-        page: initialPage,
-        hasMore: true,
+        items,
+        cursor: nextCursor,
+        hasMore: nextCursor !== null,
         isLoading: false,
         platformThreshold,
       });
     } catch {
-      setState(current => ({ ...current, isLoading: false, error: 'Unable to refresh results' }));
+      setState(s => ({
+        ...s,
+        isLoading: false,
+        error: 'Unable to refresh results',
+      }));
     }
-  }, [initialPage, pageSize, platformThreshold]);
+  }, [pageSize, platformThreshold]);
 
   return {
     ...state,

@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import NetInfo from '@react-native-community/netinfo';
 import { RootNavigator } from './navigation/RootNavigator';
 import type { RootStackParamList } from './navigation/RootNavigator';
 import { useAppStore } from './store/appStore';
@@ -13,6 +14,7 @@ import { hasValidToken } from './services/tokenStorage';
 import { processOfflineQueue } from './hooks/useOfflineQueue';
 import { NetworkStatusIndicator } from './components/NetworkStatusIndicator';
 import { OfflineCachingIndicator } from './components/OfflineCaching';
+import { OfflineBanner } from './components/OfflineBanner';
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['stellar-insights://'],
@@ -85,6 +87,11 @@ function App(): React.JSX.Element {
 
   React.useEffect(() => {
     void (async () => {
+      // Resolve initial network state before any API calls to prevent crashes on offline startup.
+      const netState = await NetInfo.fetch();
+      const initiallyOnline = (netState.isConnected && netState.isInternetReachable) ?? false;
+      useAppStore.getState().setOnlineStatus(initiallyOnline);
+
       await initializeApp();
       // Decide the initial route from securely stored token presence/expiry.
       try {
@@ -109,6 +116,7 @@ function App(): React.JSX.Element {
         <QueryClientProvider client={queryClient}>
           <NavigationContainer linking={linking}>
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+            <OfflineBanner />
             <NetworkStatusIndicator />
             <OfflineCachingIndicator showCacheSize={true} />
             <RootNavigator />

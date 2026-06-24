@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { API_CONFIG } from '@config/constants';
+import { NETWORKS } from '@config/network';
 import { useAuthStore } from '@store/authStore';
 import { useAppStore } from '@store/appStore';
 import { refreshAuthTokens } from './auth';
@@ -31,6 +32,9 @@ class ApiClient {
         }
 
         config.headers['X-Stellar-Network'] = network;
+
+        // Dynamically update base URL based on selected network
+        config.baseURL = NETWORKS[network]?.apiBaseUrl || config.baseURL;
 
         return config;
       },

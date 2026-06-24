@@ -1,18 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
+import * as SecureStore from 'expo-secure-store';
 
 /**
- * Secure auth-token storage.
+ * Secure auth-token storage using expo-secure-store.
  *
- * The token itself is held in the platform-native encrypted store via
- * `react-native-keychain` (iOS Keychain / Android Keystore). Non-sensitive
- * metadata (the expiry timestamp) is kept in `AsyncStorage` so the app can
- * cheaply decide the initial route on launch without unlocking the keychain.
+ * All sensitive information (token) and non-sensitive metadata (expiry)
+ * are stored in the platform-native secure encrypted store.
  */
 
-const KEYCHAIN_SERVICE = 'com.stellarinsights.auth';
-const TOKEN_ACCOUNT = 'auth-token';
-const EXPIRY_KEY = '@stellar-insights/token-expiry';
+const TOKEN_KEY = 'com.stellarinsights.auth.token';
+const EXPIRY_KEY = 'com.stellarinsights.auth.expiry';
 
 /**
  * Persist an auth token in encrypted storage.
@@ -24,14 +20,12 @@ export async function saveToken(
   token: string,
   expiresAt?: number,
 ): Promise<void> {
-  await Keychain.setGenericPassword(TOKEN_ACCOUNT, token, {
-    service: KEYCHAIN_SERVICE,
-  });
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
 
   if (typeof expiresAt === 'number') {
-    await AsyncStorage.setItem(EXPIRY_KEY, String(expiresAt));
+    await SecureStore.setItemAsync(EXPIRY_KEY, String(expiresAt));
   } else {
-    await AsyncStorage.removeItem(EXPIRY_KEY);
+    await SecureStore.deleteItemAsync(EXPIRY_KEY);
   }
 }
 
@@ -41,10 +35,7 @@ export async function saveToken(
  * @returns The token, or `null` when none is stored.
  */
 export async function getToken(): Promise<string | null> {
-  const credentials = await Keychain.getGenericPassword({
-    service: KEYCHAIN_SERVICE,
-  });
-  return credentials ? credentials.password : null;
+  return await SecureStore.getItemAsync(TOKEN_KEY);
 }
 
 /**
@@ -53,7 +44,7 @@ export async function getToken(): Promise<string | null> {
  * @returns Expiry as a Unix epoch in milliseconds, or `null` when unset.
  */
 export async function getTokenExpiry(): Promise<number | null> {
-  const raw = await AsyncStorage.getItem(EXPIRY_KEY);
+  const raw = await SecureStore.getItemAsync(EXPIRY_KEY);
   if (!raw) {
     return null;
   }
@@ -65,16 +56,16 @@ export async function getTokenExpiry(): Promise<number | null> {
  * Remove the stored auth token and its expiry metadata.
  */
 export async function removeToken(): Promise<void> {
-  await Keychain.resetGenericPassword({ service: KEYCHAIN_SERVICE });
-  await AsyncStorage.removeItem(EXPIRY_KEY);
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(EXPIRY_KEY);
 }
 
 /**
  * Clear all auth-related storage (token + metadata).
  */
 export async function clearAll(): Promise<void> {
-  await Keychain.resetGenericPassword({ service: KEYCHAIN_SERVICE });
-  await AsyncStorage.multiRemove([EXPIRY_KEY]);
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(EXPIRY_KEY);
 }
 
 /**
@@ -96,3 +87,4 @@ export async function hasValidToken(): Promise<boolean> {
 
   return true;
 }
+

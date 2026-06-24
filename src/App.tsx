@@ -16,6 +16,8 @@ import { NetworkStatusIndicator } from './components/NetworkStatusIndicator';
 import { OfflineCachingIndicator } from './components/OfflineCaching';
 import { OfflineBanner } from './components/OfflineBanner';
 
+import { NetworkProvider, getCurrentNetwork } from '@config/network';
+
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['stellar-insights://'],
   config: {
@@ -130,6 +132,10 @@ function App(): React.JSX.Element {
       const initiallyOnline = (netState.isConnected && netState.isInternetReachable) ?? false;
       useAppStore.getState().setOnlineStatus(initiallyOnline);
 
+      // Load network settings before initializing App
+      const initialNetConfig = await getCurrentNetwork();
+      useAppStore.getState().setNetwork(initialNetConfig.id);
+
       await initializeApp();
       // Decide the initial route from securely stored token presence/expiry.
       try {
@@ -150,18 +156,20 @@ function App(): React.JSX.Element {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <NavigationContainer linking={linking}>
-            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-            <OfflineBanner />
-            <NetworkStatusIndicator />
-            <OfflineCachingIndicator showCacheSize={true} />
-            <RootNavigator />
-          </NavigationContainer>
-          {/* Widget, 3D Touch, and Shake-to-Refresh are registered via MainNavigator */}
-        </QueryClientProvider>
-      </SafeAreaProvider>
+      <NetworkProvider>
+        <SafeAreaProvider>
+          <QueryClientProvider client={queryClient}>
+            <NavigationContainer linking={linking}>
+              <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+              <OfflineBanner />
+              <NetworkStatusIndicator />
+              <OfflineCachingIndicator showCacheSize={true} />
+              <RootNavigator />
+            </NavigationContainer>
+            {/* Widget, 3D Touch, and Shake-to-Refresh are registered via MainNavigator */}
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </NetworkProvider>
     </GestureHandlerRootView>
   );
 }

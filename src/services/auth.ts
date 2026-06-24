@@ -1,15 +1,17 @@
-import * as Keychain from 'react-native-keychain';
+import * as SecureStore from 'expo-secure-store';
 import { STORAGE_KEYS } from '@config/constants';
 import { useAuthStore } from '@store/authStore';
 import { AuthTokens, User } from '@types/index';
 import { apiClient } from './api';
 import { storage } from './storage';
 
+const AUTH_TOKENS_KEY = 'com.stellarinsights.auth.tokens';
+
 export async function loadStoredAuth(): Promise<void> {
   try {
-    const credentials = await Keychain.getGenericPassword();
+    const credentials = await SecureStore.getItemAsync(AUTH_TOKENS_KEY);
     if (credentials) {
-      const tokens: AuthTokens = JSON.parse(credentials.password);
+      const tokens: AuthTokens = JSON.parse(credentials);
       useAuthStore.getState().setTokens(tokens);
 
       const userData = storage.getString(STORAGE_KEYS.USER_DATA);
@@ -26,12 +28,12 @@ export async function loadStoredAuth(): Promise<void> {
 }
 
 export async function storeAuthTokens(tokens: AuthTokens): Promise<void> {
-  await Keychain.setGenericPassword('auth', JSON.stringify(tokens));
+  await SecureStore.setItemAsync(AUTH_TOKENS_KEY, JSON.stringify(tokens));
   useAuthStore.getState().setTokens(tokens);
 }
 
 export async function clearAuthTokens(): Promise<void> {
-  await Keychain.resetGenericPassword();
+  await SecureStore.deleteItemAsync(AUTH_TOKENS_KEY);
   storage.delete(STORAGE_KEYS.USER_DATA);
   useAuthStore.getState().logout();
 }

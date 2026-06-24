@@ -3,7 +3,7 @@ import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions, getStateFromPath } from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
 import { RootNavigator } from './navigation/RootNavigator';
 import type { RootStackParamList } from './navigation/RootNavigator';
@@ -67,7 +67,45 @@ const linking: LinkingOptions<RootStackParamList> = {
           Login: 'login',
         },
       },
+      Error: 'error',
     },
+  },
+  getStateFromPath(path, options) {
+    const matchAnchor = path.match(/anchors\/([^\/]+)/);
+    if (matchAnchor) {
+      const anchorId = matchAnchor[1];
+      if (!/^[A-F0-9]{64}$/i.test(anchorId)) {
+        return {
+          routes: [
+            {
+              name: 'Error',
+              params: {
+                message: 'Invalid Anchor ID. Deep links must contain a 64-character hexadecimal ID.',
+              },
+            },
+          ],
+        };
+      }
+    }
+
+    const matchCorridor = path.match(/corridors\/([^\/]+)/);
+    if (matchCorridor) {
+      const corridorId = matchCorridor[1];
+      if (!/^[A-F0-9]{64}$/i.test(corridorId)) {
+        return {
+          routes: [
+            {
+              name: 'Error',
+              params: {
+                message: 'Invalid Corridor ID. Deep links must contain a 64-character hexadecimal ID.',
+              },
+            },
+          ],
+        };
+      }
+    }
+
+    return getStateFromPath(path, options);
   },
 };
 

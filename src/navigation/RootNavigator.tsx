@@ -4,10 +4,12 @@ import { useAuthStore } from '@store/authStore';
 import { SplashScreen } from '@components/SplashScreen';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
+import { ErrorScreen } from '../screens/ErrorScreen';
 
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  Error: { message: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -26,6 +28,11 @@ export function RootNavigator() {
       ) : (
         <Stack.Screen name="Auth" component={AuthNavigator} />
       )}
+      <Stack.Screen
+        name="Error"
+        component={ErrorScreen}
+        options={{ headerShown: true, title: 'Error' }}
+      />
     </Stack.Navigator>
   );
 }

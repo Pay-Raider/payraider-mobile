@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useWearOSApp } from '@hooks/useWearOSApp';
 
-const SAMPLE_MESSAGES = [
+const SAMPLE_MESSAGES: { type: string; payload: Record<string, string> }[] = [
   { type: 'sync', payload: { screen: 'dashboard' } },
   { type: 'notification', payload: { message: 'Corridor update' } },
 ];

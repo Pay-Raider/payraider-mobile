@@ -43,7 +43,7 @@ describe('initializeDatabase', () => {
 describe('Assets cache', () => {
   const sampleCache: AssetsCache = {
     assets: [
-      { code: 'USDC', issuer: 'GISSUER', verified: true },
+      { code: 'USDC', issuer: 'GISSUER', verified: true, cachedAt: '2026-06-30T00:00:00.000Z' },
     ],
     total: 1,
     cachedAt: '2026-06-30T00:00:00.000Z',
@@ -68,7 +68,7 @@ describe('Assets cache', () => {
       total: 2,
       assets: [
         ...sampleCache.assets,
-        { code: 'EURC', issuer: 'GISSUER2', verified: false },
+        { code: 'EURC', issuer: 'GISSUER2', verified: false, cachedAt: '2026-06-30T00:00:00.000Z' },
       ],
     };
     await setCachedAssets(updated);

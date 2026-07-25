@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useWatchApp } from '@hooks/useWatchApp';
 
-const SAMPLE_MESSAGES = [
+const SAMPLE_MESSAGES: { type: string; payload: Record<string, string> }[] = [
   { type: 'sync', payload: { screen: 'dashboard' } },
   { type: 'alert', payload: { message: 'Anchor update' } },
 ];

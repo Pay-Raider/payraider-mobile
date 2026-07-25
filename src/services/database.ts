@@ -8,8 +8,8 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CACHE_KEYS } from '@config/constants';
-import { ANCHOR_DETAIL_CACHE_PREFIX } from '@types/anchor';
-import { CORRIDOR_DETAIL_CACHE_PREFIX } from '@types/corridor';
+import { ANCHOR_DETAIL_CACHE_PREFIX } from '@app-types/anchor';
+import { CORRIDOR_DETAIL_CACHE_PREFIX } from '@app-types/corridor';
 
 // ─── Schema version ──────────────────────────────────────────────────────────
 

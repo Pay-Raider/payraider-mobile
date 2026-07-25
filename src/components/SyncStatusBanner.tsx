@@ -40,9 +40,8 @@ export const SyncStatusBanner: React.FC<SyncStatusBannerProps> = ({
       <View
         style={[styles.banner, styles.syncing]}
         testID={testID}
-        accessibilityRole="status"
-        accessibilityLabel="Syncing data in the background"
         accessibilityLiveRegion="polite"
+        accessibilityLabel="Syncing data in the background"
       >
         <ActivityIndicator
           size="small"
@@ -87,9 +86,8 @@ export const SyncStatusBanner: React.FC<SyncStatusBannerProps> = ({
       <View
         style={[styles.banner, styles.pending]}
         testID={testID}
-        accessibilityRole="status"
-        accessibilityLabel={`${pendingCount} ${pendingCount === 1 ? 'update' : 'updates'} queued, will sync when online`}
         accessibilityLiveRegion="polite"
+        accessibilityLabel={`${pendingCount} ${pendingCount === 1 ? 'update' : 'updates'} queued, will sync when online`}
       >
         <Text style={styles.pendingIcon} accessibilityElementsHidden>
           🕐

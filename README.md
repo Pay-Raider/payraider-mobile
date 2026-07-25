@@ -4,10 +4,17 @@ React Native mobile application for Stellar Insights payment analytics.
 
 ## Current Status
 
-**Verified in CI:**
-- ✅ Dependencies install successfully
-- ✅ TypeScript type checking passes
-- ✅ ESLint/lint validation passes
+**Correction:** the "Verified in CI" claims that used to be here were not accurate — the only workflow that touches `mobile/` at all is [`.github/workflows/security-scan.yml`](../.github/workflows/security-scan.yml), which runs `npm audit` and nothing else. Nothing installs, type-checks, lints, or builds this package in CI. The status below reflects an actual run on a clean checkout instead.
+
+**Verified (clean checkout, Node v24.18.0 / npm v11.16.0 — package.json only requires `node >= 18`; this is notably newer than the Node 18/20 era React Native 0.73 targeted, worth keeping in mind if something looks version-sensitive):**
+- ✅ `npm install` completes cleanly — 1226 packages, no ERESOLVE / peer-dependency conflicts, no native-module-linking errors, `package-lock.json` unchanged from what's committed.
+
+**Currently broken — do not treat these as passing gates:**
+- ❌ `npm run type-check` fails: 130 errors across 68 files. One was a real blocking bug — `src/config/network.ts` contained JSX (`<NetworkContext.Provider>`) but had a `.ts` extension, so nothing in the file could even parse; fixed by renaming to `.tsx` (this change). The rest are pre-existing and out of scope for a quick fix:
+  - 23 errors (`TS6137`, "Cannot import type declaration files") share one root cause: `tsconfig.json`'s path alias `"@types/*": ["src/types/*"]` collides with TypeScript's reserved handling of the `@types/` npm scope, which refuses runtime imports through that prefix regardless of what the alias actually points to. Renaming the alias (e.g. `@apptypes/*`) and updating its ~15 import sites would likely clear this bucket in one pass.
+  - ~10 errors ("Cannot find namespace 'NodeJS'") suggest `@types/node` isn't a devDependency.
+  - The remaining ~97 are scattered and unrelated to each other across `src/features/*` (face_recognition, fingerprint_scanner, voice_commands — RN `AccessibilityRole` type mismatches, `react-native-mmkv` API drift, stale React Native Testing Library matcher usage) and `src/hooks/*` — will need file-by-file triage.
+- ❌ `npm run lint` doesn't run at all — crashes immediately with `TypeError: prettier.resolveConfig.sync is not a function`. Root cause: `@react-native/eslint-config@0.73.2` pulls in its own nested `eslint-plugin-prettier@4.2.5`, built against Prettier's pre-v3 (sync) API; this repo's `prettier` resolves to `3.8.3`. Likely fix is an npm `overrides` pin of `eslint-plugin-prettier` to `^5` (the version compatible with Prettier v3) — not attempted here since it needs a full clean lint run afterward to confirm it doesn't change lint behavior elsewhere in the package.
 
 **NOT verified (no simulator/EAS credentials in CI environment):**
 - ❌ Native iOS build (simulator or device)
@@ -16,8 +23,9 @@ React Native mobile application for Stellar Insights payment analytics.
 - ❌ App store distribution (iOS/Google Play)
 
 **What this means:**
-- The mobile app code is syntactically correct and free of type errors
-- The app can be built and run locally if you have Xcode/Android Studio configured
+- `npm install` is reliable — dependencies land on disk without special flags or manual intervention.
+- Don't rely on `npm run type-check` or `npm run lint` as stabilization signals yet; both need dedicated follow-up work before they're meaningful gates.
+- The app can be built and run locally if you have Xcode/Android Studio configured, independent of the type-check/lint issues above (Metro/Babel transpile without type-checking).
 - Contributors who want to test native builds must do so on their own machine
 - Full testing requires running `npm run ios` or `npm run android` locally
 

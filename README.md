@@ -2,6 +2,41 @@
 
 React Native mobile application for Stellar Insights payment analytics.
 
+## Current Status
+
+**Verified in CI:**
+- ✅ Dependencies install successfully
+- ✅ TypeScript type checking passes
+- ✅ ESLint/lint validation passes
+
+**NOT verified (no simulator/EAS credentials in CI environment):**
+- ❌ Native iOS build (simulator or device)
+- ❌ Native Android build (emulator or device)
+- ❌ End-to-end testing on actual device
+- ❌ App store distribution (iOS/Google Play)
+
+**What this means:**
+- The mobile app code is syntactically correct and free of type errors
+- The app can be built and run locally if you have Xcode/Android Studio configured
+- Contributors who want to test native builds must do so on their own machine
+- Full testing requires running `npm run ios` or `npm run android` locally
+
+**To verify native builds yourself:**
+
+```bash
+# Install dependencies
+npm install
+cd ios && pod install && cd ..
+
+# For iOS (requires Xcode):
+npm run ios
+
+# For Android (requires Android Studio/SDK):
+npm run android
+```
+
+If you encounter issues, see the Troubleshooting section below. If you fix an issue, please document it in this README or open an issue for the team.
+
 ## Features
 
 - 📱 Cross-platform (iOS & Android)

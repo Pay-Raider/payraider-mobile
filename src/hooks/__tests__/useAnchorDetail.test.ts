@@ -185,7 +185,7 @@ describe('useAnchorDetail', () => {
     });
 
     expect(apiClient.get).toHaveBeenCalledWith(
-      `/anchors/account/${encodeURIComponent(stellarAccount)}`,
+      `/api/v1/anchors/account/${encodeURIComponent(stellarAccount)}`,
     );
   });
 });

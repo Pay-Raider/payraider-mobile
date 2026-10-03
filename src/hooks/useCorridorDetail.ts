@@ -156,7 +156,7 @@ async function writeCachedCorridor(
 
 async function fetchCorridorDetail(corridorId: string): Promise<CorridorDetailData> {
   return apiClient.get<CorridorDetailData>(
-    `/corridors/${encodeURIComponent(corridorId)}`,
+    `/api/v1/corridors/${encodeURIComponent(corridorId)}`,
   );
 }
 

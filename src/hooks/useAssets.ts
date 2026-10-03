@@ -122,7 +122,7 @@ async function writeCachedAssets(data: AssetsListData): Promise<void> {
 // ─── API fetch ───────────────────────────────────────────────────────────────
 
 async function fetchAssetsList(): Promise<AssetsListData> {
-  const response = await apiClient.get<unknown>('/assets');
+  const response = await apiClient.get<unknown>('/api/v1/assets');
   return normalizeAssetsResponse(response);
 }
 

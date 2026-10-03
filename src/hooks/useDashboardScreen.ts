@@ -105,7 +105,7 @@ async function writeCachedDashboard(data: DashboardData): Promise<void> {
 }
 
 async function fetchDashboard(): Promise<DashboardData> {
-  const response = await apiClient.get<unknown>('/analytics/dashboard');
+  const response = await apiClient.get<unknown>('/api/v1/analytics/dashboard');
   return normalizeDashboardResponse(response);
 }
 

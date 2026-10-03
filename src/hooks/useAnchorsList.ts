@@ -130,7 +130,7 @@ async function writeCachedAnchors(data: AnchorsListData): Promise<void> {
 }
 
 async function fetchAnchorsList(): Promise<AnchorsListData> {
-  const response = await apiClient.get<unknown>('/anchors');
+  const response = await apiClient.get<unknown>('/api/v1/anchors');
   return normalizeAnchorsResponse(response);
 }
 

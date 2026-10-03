@@ -141,7 +141,7 @@ async function writeCachedCorridors(data: CorridorsListData): Promise<void> {
 }
 
 async function fetchCorridorsList(): Promise<CorridorsListData> {
-  const response = await apiClient.get<unknown>('/corridors');
+  const response = await apiClient.get<unknown>('/api/v1/corridors');
   return normalizeCorridorsResponse(response);
 }
 

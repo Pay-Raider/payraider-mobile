@@ -235,8 +235,8 @@ async function writeCachedAnchor(anchorId: string, data: AnchorDetailData): Prom
 async function fetchAnchorDetail(anchorId: string): Promise<AnchorDetailData> {
   const trimmed = anchorId.trim();
   const path = isStellarAccountAddress(trimmed)
-    ? `/anchors/account/${encodeURIComponent(trimmed)}`
-    : `/anchors/${encodeURIComponent(trimmed)}`;
+    ? `/api/v1/anchors/account/${encodeURIComponent(trimmed)}`
+    : `/api/v1/anchors/${encodeURIComponent(trimmed)}`;
 
   const response = await apiClient.get<unknown>(path);
   return normalizeAnchorDetailResponse(response, trimmed);

@@ -22,8 +22,6 @@ jobs:
       - run: npm ci
       - name: Type-check
         run: npm run type-check
-      # Several suites still need native-module mocks (see docs/STATUS.md),
-      # so test results are reported without failing the build yet.
-      - name: Test (informational)
-        run: npm test -- --ci
-        continue-on-error: true
+      # *.testnet.test.ts suites hit live Horizon; run them with `npm run test:testnet`.
+      - name: Test
+        run: npm test -- --ci --testPathIgnorePatterns testnet

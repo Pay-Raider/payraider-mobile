@@ -18,9 +18,35 @@ jest.mock('react-native-reanimated', () => {
 // react-native 0.87 moved this from Libraries/Animated/ into src/private/animated/.
 jest.mock('react-native/src/private/animated/NativeAnimatedHelper');
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
+// AsyncStorage v3's bundled mock is ESM and not built from jest.fn, so tests
+// could not stub individual calls. This in-memory mock keeps every method a
+// jest.fn.
+jest.mock('@react-native-async-storage/async-storage', () => {
+  const store = new Map();
+  const AsyncStorage = {
+    getItem: jest.fn(async key => (store.has(key) ? store.get(key) : null)),
+    setItem: jest.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    removeItem: jest.fn(async key => {
+      store.delete(key);
+    }),
+    getAllKeys: jest.fn(async () => [...store.keys()]),
+    getMany: jest.fn(async keys =>
+      Object.fromEntries(keys.map(k => [k, store.has(k) ? store.get(k) : null])),
+    ),
+    setMany: jest.fn(async entries => {
+      Object.entries(entries).forEach(([k, v]) => store.set(k, v));
+    }),
+    removeMany: jest.fn(async keys => {
+      keys.forEach(k => store.delete(k));
+    }),
+    clear: jest.fn(async () => {
+      store.clear();
+    }),
+  };
+  return { __esModule: true, default: AsyncStorage, ...AsyncStorage };
+});
 
 jest.mock('@react-native-community/netinfo', () => ({
   fetch: jest.fn(() =>

@@ -107,7 +107,8 @@ export async function clearDatabase(): Promise<void> {
   );
 
   if (cacheKeys.length > 0) {
-    await AsyncStorage.multiRemove(cacheKeys);
+    // AsyncStorage v3 renamed multiRemove to removeMany.
+    await AsyncStorage.removeMany(cacheKeys);
   }
 }
 

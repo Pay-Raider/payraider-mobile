@@ -10,7 +10,7 @@ Part of [PayRaider](https://github.com/Pay-Raider): [backend](https://github.com
 
 ---
 
-> **Early stage.** The app type-checks cleanly, but it has not yet been built or run on a device, the native `ios/` and `android/` projects are not generated yet, and part of the test suite still fails for lack of native-module mocks. For production use, use the [web app](https://github.com/Pay-Raider/payraider-app) or the [API](https://github.com/Pay-Raider/payraider-backend). Details: [docs/STATUS.md](docs/STATUS.md).
+> **Early stage.** The app type-checks cleanly, but it has not yet been built or run on a device, the native `ios/` and `android/` projects are not generated yet. For production use, use the [web app](https://github.com/Pay-Raider/payraider-app) or the [API](https://github.com/Pay-Raider/payraider-backend). Details: [docs/STATUS.md](docs/STATUS.md).
 
 ## What it does
 
@@ -42,7 +42,8 @@ npm run ios        # or: npm run android
 
 ```bash
 npm run type-check   # TypeScript, passes
-npm test             # Jest, partly failing pending native mocks (see docs/STATUS.md)
+npm test             # Jest unit and component tests
+npm run test:testnet # Smoke tests against live Stellar testnet
 ```
 
 ## Project layout
@@ -58,7 +59,6 @@ npm test             # Jest, partly failing pending native mocks (see docs/STATU
 ## Roadmap
 
 1. Generate and commit the native projects; build on both platforms.
-2. Mock native modules so the full test suite runs in CI.
 3. Add the pre-payment check screen to match the web app.
 
 ## License

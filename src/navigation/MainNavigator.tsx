@@ -1,16 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text } from 'react-native';
 import { DashboardScreen } from '@components/DashboardScreen';
 import { CorridorsList } from '@components/CorridorsList';
 import { AnchorsList } from '@components/AnchorsList';
 import { SettingsScreen } from '@screens/main/SettingsScreen';
 import { CorridorDetail } from '@components/CorridorDetail';
 import { AnchorDetail } from '@components/AnchorDetail';
-import { NetworkSwitchButton } from '@components/NetworkSwitchDialog';
-import { SearchFunctionality } from '@components/SearchFunctionality';
-import type { SearchableItem } from '@hooks/useSearchFunctionality';
+import { PreflightCheck } from '@components/PreflightCheck';
 
 export type CorridorsStackParamList = {
   CorridorsList: undefined;
@@ -29,9 +26,8 @@ export type AnchorsStackParamList = {
 export type MainTabParamList = {
   Dashboard: undefined;
   Corridors: undefined;
+  Check: undefined;
   Anchors: undefined;
-  NetworkSwitchDialog: undefined;
-  SearchFunctionality: undefined;
   Settings: undefined;
 };
 
@@ -73,49 +69,6 @@ function AnchorsNavigator() {
   );
 }
 
-// Wrapper component for Network Switch
-const NetworkSwitchScreen = () => {
-  const [, setDialogVisible] = React.useState(true);
-
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <NetworkSwitchButton onPress={() => setDialogVisible(true)} />
-    </View>
-  );
-};
-
-// Wrapper component for Search Functionality
-const SearchFunctionalityScreen = () => {
-  const [searchData] = React.useState<SearchableItem[]>([
-    {
-      id: '1',
-      name: 'Stellar Development Foundation',
-      description: 'Official Stellar organization',
-    },
-    { id: '2', name: 'Stellar Lumens', description: 'Cryptocurrency token' },
-    { id: '3', name: 'Stellar Protocol', description: 'Blockchain protocol' },
-    { id: '4', name: 'Stellar Quest', description: 'Learning platform' },
-    { id: '5', name: 'Stellar Anchor', description: 'Bridge between different networks' },
-  ]);
-
-  return (
-    <SearchFunctionality
-      data={searchData}
-      renderItem={({ item }) => (
-        <View>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#212121', marginBottom: 4 }}>
-            {(item as { name: string }).name}
-          </Text>
-          <Text style={{ fontSize: 12, color: '#666666' }}>
-            {(item as { description: string }).description}
-          </Text>
-        </View>
-      )}
-      placeholder="Search Stellar resources..."
-    />
-  );
-};
-
 export function MainNavigator() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: true }}>
@@ -125,17 +78,12 @@ export function MainNavigator() {
         component={CorridorsNavigator}
         options={{ headerShown: false }}
       />
+      <Tab.Screen
+        name="Check"
+        component={PreflightCheck}
+        options={{ title: 'Check a payment', tabBarLabel: 'Check' }}
+      />
       <Tab.Screen name="Anchors" component={AnchorsNavigator} options={{ headerShown: false }} />
-      <Tab.Screen
-        name="NetworkSwitchDialog"
-        component={NetworkSwitchScreen}
-        options={{ title: 'Network Switch' }}
-      />
-      <Tab.Screen
-        name="SearchFunctionality"
-        component={SearchFunctionalityScreen}
-        options={{ title: 'Search' }}
-      />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );

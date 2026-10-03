@@ -15,9 +15,8 @@ const mainNavigatorSource = fs.readFileSync(
 const TAB_ROUTE_NAMES = [
   'Dashboard',
   'Corridors',
+  'Check',
   'Anchors',
-  'NetworkSwitchDialog',
-  'SearchFunctionality',
   'Settings',
 ] as const;
 
@@ -53,12 +52,8 @@ jest.mock('@components/AnchorDetail', () => ({
   AnchorDetail: mockScreen('Anchor Detail'),
 }));
 
-jest.mock('@components/NetworkSwitchDialog', () => ({
-  NetworkSwitchButton: mockScreen('Network Switch'),
-}));
-
-jest.mock('@components/SearchFunctionality', () => ({
-  SearchFunctionality: mockScreen('Search'),
+jest.mock('@components/PreflightCheck', () => ({
+  PreflightCheck: mockScreen('Preflight Check'),
 }));
 
 function createTabInitialState(activeTab: (typeof TAB_ROUTE_NAMES)[number]) {
@@ -144,5 +139,15 @@ describe('MainNavigator', () => {
     );
 
     expect(getByText('Corridors List')).toBeTruthy();
+  });
+
+  it('mounts the pre-payment check when the Check tab is active', async () => {
+    const { getByText } = await render(
+      <NavigationContainer initialState={createTabInitialState('Check')}>
+        <MainNavigator />
+      </NavigationContainer>,
+    );
+
+    expect(getByText('Preflight Check')).toBeTruthy();
   });
 });

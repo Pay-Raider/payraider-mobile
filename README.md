@@ -16,6 +16,7 @@ Part of [PayRaider](https://github.com/Pay-Raider): [backend](https://github.com
 
 | Screen | What it shows |
 | --- | --- |
+| **Check** | The pre-payment check: enter a payment and get proceed / caution / hold / unknown, the reasons, and healthier alternatives |
 | **Corridors** | Success rate, liquidity and health of Stellar payment corridors |
 | **Anchors** | Anchor directory and reliability |
 | **Settings** | Network (mainnet / testnet), notifications, security |
@@ -59,7 +60,7 @@ npm run test:testnet # Smoke tests against live Stellar testnet
 ## Roadmap
 
 1. Generate and commit the native projects; build on both platforms.
-2. Add the pre-payment check screen to match the web app.
+2. Run the app end to end against a deployed API on a device.
 
 ## License
 

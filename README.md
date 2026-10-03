@@ -59,7 +59,7 @@ npm run test:testnet # Smoke tests against live Stellar testnet
 ## Roadmap
 
 1. Generate and commit the native projects; build on both platforms.
-3. Add the pre-payment check screen to match the web app.
+2. Add the pre-payment check screen to match the web app.
 
 ## License
 
